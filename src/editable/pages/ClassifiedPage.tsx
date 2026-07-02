@@ -1,8 +1,8 @@
-import { EditableTaskArchiveRoute, taskMetadata } from '@/editable/pages/TaskArchivePage'
+import { MarketplaceArchiveRoute, marketplaceTaskMetadata } from '@/editable/pages/MarketplacePages'
 
 export const revalidate = 3
 
-export const generateMetadata = () => taskMetadata('classified', '/classified')
+export const generateMetadata = () => marketplaceTaskMetadata('classified', '/classified')
 
 export async function ClassifiedPageTaskPage({
   searchParams,
@@ -11,7 +11,7 @@ export async function ClassifiedPageTaskPage({
   searchParams?: Promise<{ category?: string; page?: string }>
   basePath?: string
 }) {
-  return <EditableTaskArchiveRoute task="classified" searchParams={searchParams} basePath={basePath} />
+  return <MarketplaceArchiveRoute task="classified" searchParams={searchParams} basePath={basePath} />
 }
 
 export default ClassifiedPageTaskPage

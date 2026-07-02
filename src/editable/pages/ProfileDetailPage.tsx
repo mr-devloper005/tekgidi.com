@@ -1,4 +1,4 @@
-import { EditableTaskDetailRoute, generateEditableDetailMetadata } from '@/editable/pages/TaskDetailPage'
+import { generateMarketplaceDetailMetadata, MarketplaceDetailRoute } from '@/editable/pages/MarketplacePages'
 
 export const revalidate = 3
 
@@ -7,9 +7,9 @@ export async function generateStaticParams() {
 }
 
 export async function generateMetadata({ params }: { params: Promise<{ username: string }> }) {
-  return generateEditableDetailMetadata('profile', params)
+  return generateMarketplaceDetailMetadata('profile', params)
 }
 
 export default async function ProfileDetailPage({ params }: { params: Promise<{ username: string }> }) {
-  return <EditableTaskDetailRoute task="profile" params={params} />
+  return <MarketplaceDetailRoute task="profile" params={params} />
 }

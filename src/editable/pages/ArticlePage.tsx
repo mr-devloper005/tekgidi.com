@@ -1,17 +1,17 @@
-import { EditableTaskArchiveRoute, taskMetadata } from '@/editable/pages/TaskArchivePage'
+import { EditorialArchiveRoute, editorialTaskMetadata } from '@/editable/pages/EditorialPages'
 
 export const revalidate = 3
 
-export const generateMetadata = () => taskMetadata('article', '/article')
+export const generateMetadata = () => editorialTaskMetadata()
 
 export async function ArticlePageTaskPage({
   searchParams,
-  basePath = '/article',
+  basePath,
 }: {
   searchParams?: Promise<{ category?: string; page?: string }>
   basePath?: string
 }) {
-  return <EditableTaskArchiveRoute task="article" searchParams={searchParams} basePath={basePath} />
+  return <EditorialArchiveRoute searchParams={searchParams} basePath={basePath} />
 }
 
 export default ArticlePageTaskPage

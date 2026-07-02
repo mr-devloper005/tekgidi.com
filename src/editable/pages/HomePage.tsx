@@ -5,7 +5,7 @@ import { buildPageMetadata } from '@/lib/seo'
 import { fetchHomeTaskFeed, fetchHomeTimeSections, type HomeTimeSection } from '@/lib/task-data'
 import { pagesContent } from '@/editable/content/pages.content'
 import type { SitePost } from '@/lib/site-connector'
-import { EditableHomeCta, EditableHomeHero, EditableMagazineSplit, EditableStoryRail, EditableTimeCollections } from '@/editable/sections/HomeSections'
+import { EditableHomeCta, EditableHomeHero, EditableMagazineSplit, EditableStoryRail, EditableTimeCollections } from '@/editable/sections/HomeSectionsRedesign'
 import { EditableSiteShell } from '@/editable/shell/EditableSiteShell'
 import { Ads } from '@/lib/ads'
 export const revalidate = 300
