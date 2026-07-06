@@ -1,139 +1,126 @@
 'use client'
 
 import { useMemo, useState } from 'react'
+import Image from 'next/image'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import { Menu, Search, UserPlus, LogIn, X, PlusCircle } from 'lucide-react'
+import { LogIn, Menu, PlusCircle, Search, UserPlus, X } from 'lucide-react'
 import { SITE_CONFIG } from '@/lib/site-config'
-import { globalContent } from '@/editable/content/global.content'
 import { useEditableLocalAuthSession } from '@/editable/components/EditableLocalAuthForms'
+
+const hiddenFrontFacingTasks = new Set(['classified', 'profile'])
 
 export function EditableNavbar() {
   const [open, setOpen] = useState(false)
   const pathname = usePathname()
   const { session, logout } = useEditableLocalAuthSession()
   const navItems = useMemo(
-    () => SITE_CONFIG.tasks.filter((task) => task.enabled).map((task) => ({ label: task.label, href: task.route })),
+    () =>
+      SITE_CONFIG.tasks
+        .filter((task) => task.enabled && !hiddenFrontFacingTasks.has(task.key))
+        .slice(0, 3)
+        .map((task) => ({ label: task.label.toUpperCase(), href: task.route })),
     []
   )
 
-  return (
-    <header className="sticky top-0 z-50 bg-[var(--editable-nav-bg)]/96 text-[var(--editable-nav-text)] backdrop-blur-md">
-      <div className="h-[3px] bg-[linear-gradient(90deg,transparent_0%,var(--slot4-accent)_20%,var(--slot4-accent)_80%,transparent_100%)]" />
+  const mobileItems = [{ label: 'HOME', href: '/' }, ...navItems, { label: 'CONTACT', href: '/contact' }]
 
-      <nav className="mx-auto flex min-h-[76px] w-full max-w-[var(--editable-container)] items-center gap-5 px-4 sm:px-6 lg:px-8">
-        <Link href="/" className="group flex shrink-0 items-center gap-3 border-r border-[var(--editable-border)] pr-5">
-          <span className="flex h-11 w-11 items-center justify-center border border-[var(--slot4-accent)]/45 bg-[var(--slot4-surface-bg)] transition group-hover:border-[var(--slot4-accent)]">
-            <img src="/favicon.png?v=20260413" alt={SITE_CONFIG.name} className="h-8 w-8 object-contain" />
+  return (
+    <header className="sticky top-0 z-50 border-b border-white/10 bg-[var(--editable-nav-bg)] text-[var(--editable-nav-text)]">
+      <nav className="mx-auto flex min-h-[60px] w-full max-w-[var(--editable-container)] items-center gap-4 px-4 sm:px-6 lg:px-8">
+        <Link href="/" className="editable-tech flex shrink-0 items-center gap-3 text-[0.95rem] font-medium uppercase tracking-[0.42em] text-[var(--editable-nav-text)]">
+          <span className="relative flex h-10 w-10 items-center justify-center overflow-hidden rounded-[0.7rem] border border-white/12 bg-white/6 p-1.5 shadow-[0_10px_24px_rgba(0,0,0,0.22)]">
+            <Image src="/favicon.png" alt={`${SITE_CONFIG.name} logo`} fill sizes="40px" className="object-contain p-1" />
           </span>
-          <span className="hidden min-w-0 md:block">
-            <span className="editable-display block max-w-[200px] truncate text-xl font-semibold leading-none tracking-[0.01em]">{SITE_CONFIG.name}</span>
-            <span className="mt-1 block max-w-[200px] truncate text-[10px] font-medium uppercase tracking-[0.26em] text-[var(--slot4-muted-text)]">
-              {globalContent.nav?.tagline || SITE_CONFIG.tagline}
-            </span>
-          </span>
+          <span className="hidden sm:inline">{SITE_CONFIG.name.replace(/\s+/g, '.')}</span>
         </Link>
 
-        <div className="hidden items-stretch gap-0 lg:flex">
-          {navItems.slice(0, 5).map((item) => {
+        <div className="hidden flex-1 items-center justify-center gap-10 lg:flex">
+          {navItems.map((item) => {
             const active = pathname === item.href || pathname.startsWith(`${item.href}/`)
             return (
               <Link
                 key={item.href}
                 href={item.href}
-                className={`relative flex items-center px-4 text-[11px] font-semibold uppercase tracking-[0.22em] transition ${
-                  active ? 'text-[var(--slot4-accent)]' : 'text-[var(--slot4-muted-text)] hover:text-[var(--slot4-page-text)]'
+                className={`editable-tech text-sm font-bold tracking-[0.14em] transition ${
+                  active ? 'text-[var(--slot4-on-accent)]' : 'text-white/78 hover:text-white'
                 }`}
               >
                 {item.label}
-                {active ? <span className="absolute inset-x-3 bottom-0 h-[2px] bg-[var(--slot4-accent)]" /> : null}
               </Link>
             )
           })}
         </div>
 
-        <form action="/search" className="mx-auto hidden min-w-0 flex-1 justify-center md:flex">
-          <label className="flex w-full max-w-md items-center gap-2 border-b border-[var(--slot4-accent)]/30 pb-2 transition focus-within:border-[var(--slot4-accent)]">
-            <Search className="h-4 w-4 shrink-0 text-[var(--slot4-accent)]" />
-            <input
-              name="q"
-              type="search"
-              placeholder="Search posts"
-              className="min-w-0 flex-1 bg-transparent text-sm font-medium outline-none placeholder:text-[var(--slot4-muted-text)]"
-            />
-          </label>
-        </form>
+        <div className="ml-auto flex items-center gap-2.5">
+          <form action="/search" className="hidden items-center gap-2 md:flex">
+            <button type="submit" className="flex h-8 w-8 items-center justify-center text-white/86 transition hover:text-white" aria-label="Search">
+              <Search className="h-4.5 w-4.5" />
+            </button>
+          </form>
 
-        <div className="ml-auto flex shrink-0 items-center gap-2">
           {session ? (
             <>
-              <Link
-                href="/create"
-                className="hidden items-center gap-2 border border-[var(--slot4-accent)] bg-[var(--editable-cta-bg)] px-4 py-2 text-[11px] font-semibold uppercase tracking-[0.18em] text-[var(--editable-cta-text)] transition hover:opacity-90 sm:inline-flex"
-              >
+              <Link href="/create" className="hidden items-center gap-2 border border-white/20 px-3 py-2 text-xs font-bold uppercase tracking-[0.14em] text-white sm:inline-flex">
                 <PlusCircle className="h-3.5 w-3.5" /> Create
               </Link>
-              <button
-                type="button"
-                onClick={logout}
-                className="hidden items-center gap-2 px-3 py-2 text-[11px] font-semibold uppercase tracking-[0.18em] text-[var(--slot4-muted-text)] transition hover:text-[var(--slot4-page-text)] sm:inline-flex"
-              >
+              <button type="button" onClick={logout} className="hidden text-xs font-bold uppercase tracking-[0.14em] text-white/72 transition hover:text-white sm:inline-flex">
                 Logout
               </button>
             </>
           ) : (
-            <>
-              <Link
-                href="/login"
-                className="hidden items-center gap-2 border border-[var(--editable-border)] px-3 py-2 text-[11px] font-semibold uppercase tracking-[0.18em] text-[var(--slot4-muted-text)] transition hover:border-[var(--slot4-accent)]/40 hover:text-[var(--slot4-page-text)] sm:inline-flex"
-              >
-                <LogIn className="h-3.5 w-3.5" /> Login
-              </Link>
-              <Link
-                href="/signup"
-                className="hidden items-center gap-2 border border-[var(--slot4-accent)] bg-[var(--editable-cta-bg)] px-4 py-2 text-[11px] font-semibold uppercase tracking-[0.18em] text-[var(--editable-cta-text)] transition hover:opacity-90 sm:inline-flex"
-              >
-                <UserPlus className="h-3.5 w-3.5" /> Sign up
-              </Link>
-            </>
+            <Link href="/login" className="hidden h-9 w-9 items-center justify-center rounded-[0.45rem] border border-[var(--slot4-accent)] bg-[var(--slot4-dark-bg)] text-white shadow-[0_0_0_1px_rgba(241,240,228,0.08)] sm:flex" aria-label="Login">
+              <UserPlus className="h-4 w-4" />
+            </Link>
           )}
-          <button
-            type="button"
-            onClick={() => setOpen((value) => !value)}
-            className="border border-[var(--editable-border)] bg-[var(--slot4-surface-bg)] p-2 lg:hidden"
-            aria-label="Toggle menu"
-          >
-            {open ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
+
+          <button type="button" onClick={() => setOpen((value) => !value)} className="flex h-9 w-9 items-center justify-center border border-white/20 text-white lg:hidden" aria-label="Toggle menu">
+            {open ? <X className="h-4.5 w-4.5" /> : <Menu className="h-4.5 w-4.5" />}
           </button>
         </div>
       </nav>
 
-      <div className="h-px bg-[var(--editable-border)]" />
-
       {open ? (
-        <div className="border-t border-[var(--editable-border)] bg-[var(--editable-nav-bg)] px-4 py-5 lg:hidden">
-          <form action="/search" className="mb-5 flex items-center gap-2 border-b border-[var(--slot4-accent)]/30 pb-2">
-            <Search className="h-4 w-4 text-[var(--slot4-accent)]" />
-            <input name="q" type="search" placeholder="Search posts" className="min-w-0 flex-1 bg-transparent text-sm outline-none placeholder:text-[var(--slot4-muted-text)]" />
+        <div className="border-t border-white/10 bg-[var(--editable-nav-bg)] px-4 py-5 lg:hidden">
+          <form action="/search" className="mb-4 flex items-center gap-3 border border-white/12 bg-white/5 px-4 py-3">
+            <Search className="h-4 w-4 text-white/70" />
+            <input name="q" type="search" placeholder="Search the market" className="min-w-0 flex-1 bg-transparent text-sm text-white outline-none" />
           </form>
-          <div className="grid gap-1">
-            {[{ label: 'Home', href: '/' }, ...navItems, { label: 'Contact', href: '/contact' }, ...(session ? [{ label: 'Create', href: '/create' }] : [{ label: 'Login', href: '/login' }, { label: 'Sign up', href: '/signup' }])].map((item) => {
+          <div className="grid gap-2">
+            {mobileItems.map((item) => {
               const active = pathname === item.href || pathname.startsWith(`${item.href}/`)
               return (
                 <Link
                   key={item.href}
                   href={item.href}
                   onClick={() => setOpen(false)}
-                  className={`border-l-2 px-4 py-3 text-sm font-semibold uppercase tracking-[0.16em] ${
-                    active
-                      ? 'border-[var(--slot4-accent)] bg-[var(--slot4-surface-bg)] text-[var(--slot4-accent)]'
-                      : 'border-transparent text-[var(--slot4-muted-text)] hover:border-[var(--slot4-accent)]/40 hover:bg-[var(--slot4-surface-bg)]'
+                  className={`editable-tech border px-4 py-3 text-sm font-bold tracking-[0.14em] ${
+                    active ? 'border-white/28 bg-white/8 text-white' : 'border-white/10 text-white/78'
                   }`}
                 >
                   {item.label}
                 </Link>
               )
             })}
+            {session ? (
+              <>
+                <Link href="/create" onClick={() => setOpen(false)} className="editable-tech border border-white/10 px-4 py-3 text-sm font-bold tracking-[0.14em] text-white/78">
+                  CREATE
+                </Link>
+                <button type="button" onClick={logout} className="editable-tech border border-white/10 px-4 py-3 text-left text-sm font-bold tracking-[0.14em] text-white/78">
+                  LOGOUT
+                </button>
+              </>
+            ) : (
+              <>
+                <Link href="/login" onClick={() => setOpen(false)} className="editable-tech border border-white/10 px-4 py-3 text-sm font-bold tracking-[0.14em] text-white/78">
+                  <span className="inline-flex items-center gap-2"><LogIn className="h-4 w-4" /> LOGIN</span>
+                </Link>
+                <Link href="/signup" onClick={() => setOpen(false)} className="editable-tech border border-white/10 px-4 py-3 text-sm font-bold tracking-[0.14em] text-white/78">
+                  <span className="inline-flex items-center gap-2"><UserPlus className="h-4 w-4" /> SIGN UP</span>
+                </Link>
+              </>
+            )}
           </div>
         </div>
       ) : null}

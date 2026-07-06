@@ -1,8 +1,8 @@
-import { EditableTaskArchiveRoute, taskMetadata } from '@/editable/pages/TaskArchivePage'
+import { DirectoryArchiveRoute, directoryTaskMetadata } from '@/editable/pages/DirectoryPages'
 
 export const revalidate = 3
 
-export const generateMetadata = () => taskMetadata('listing', '/listing')
+export const generateMetadata = () => directoryTaskMetadata()
 
 export async function BusinessListingPageTaskPage({
   searchParams,
@@ -11,7 +11,7 @@ export async function BusinessListingPageTaskPage({
   searchParams?: Promise<{ category?: string; page?: string }>
   basePath?: string
 }) {
-  return <EditableTaskArchiveRoute task="listing" searchParams={searchParams} basePath={basePath} />
+  return <DirectoryArchiveRoute searchParams={searchParams} basePath={basePath} />
 }
 
 export default BusinessListingPageTaskPage

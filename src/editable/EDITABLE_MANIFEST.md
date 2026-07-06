@@ -15,7 +15,7 @@ Slot 4 is now a reference-ready editable UI architecture.
 ```txt
 src/editable/shell/EditableSiteShell.tsx
 src/editable/shell/EditableNavbar.tsx
-src/editable/shell/EditableFooter.tsx
+src/editable/shell/EditableFooterRedesign.tsx
 src/editable/pages/HomePage.tsx
 src/editable/pages/LoginPage.tsx
 src/editable/pages/SignupPage.tsx

@@ -1,4 +1,4 @@
-import { EditableTaskDetailRoute, generateEditableDetailMetadata } from '@/editable/pages/TaskDetailPage'
+import { generateMarketplaceDetailMetadata, MarketplaceDetailRoute } from '@/editable/pages/MarketplacePages'
 
 export const revalidate = 3
 
@@ -7,9 +7,9 @@ export async function generateStaticParams() {
 }
 
 export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }) {
-  return generateEditableDetailMetadata('classified', params)
+  return generateMarketplaceDetailMetadata('classified', params)
 }
 
 export default async function ClassifiedDetailPage({ params }: { params: Promise<{ slug: string }> }) {
-  return <EditableTaskDetailRoute task="classified" params={params} />
+  return <MarketplaceDetailRoute task="classified" params={params} />
 }

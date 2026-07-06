@@ -1,4 +1,4 @@
-import { EditableTaskDetailRoute, generateEditableDetailMetadata } from '@/editable/pages/TaskDetailPage'
+import { EditorialDetailRoute, generateEditorialDetailMetadata } from '@/editable/pages/EditorialPages'
 
 export const revalidate = 3
 
@@ -7,9 +7,9 @@ export async function generateStaticParams() {
 }
 
 export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }) {
-  return generateEditableDetailMetadata('article', params)
+  return generateEditorialDetailMetadata(params)
 }
 
 export default async function ArticleDetailPage({ params }: { params: Promise<{ slug: string }> }) {
-  return <EditableTaskDetailRoute task="article" params={params} />
+  return <EditorialDetailRoute params={params} />
 }
