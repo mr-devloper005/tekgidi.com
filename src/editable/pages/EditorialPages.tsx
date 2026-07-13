@@ -1,6 +1,6 @@
 import Link from 'next/link'
 import { notFound } from 'next/navigation'
-import { ArrowLeft, ArrowRight, ChevronDown, Clock3, MapPin, Shield, Sparkles, Star } from 'lucide-react'
+import { ArrowLeft, ArrowRight, ChevronDown, Clock3, Shield, Star } from 'lucide-react'
 import { buildPostMetadata, buildTaskMetadata } from '@/lib/seo'
 import { CATEGORY_OPTIONS, normalizeCategory } from '@/lib/categories'
 import { fetchArticleComments, fetchPaginatedTaskPosts, fetchTaskPostBySlug, fetchTaskPosts } from '@/lib/task-data'
