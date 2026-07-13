@@ -25,6 +25,38 @@ const safeImage = (post: SitePost) => {
   const gallery = Array.isArray(content.images) ? content.images.find((item) => typeof item === 'string' && item) : ''
   return mediaImage || gallery || asText(content.image) || asText(content.logo) || '/placeholder.svg?height=900&width=1200'
 }
+const escapeHtml = (value: string) => value
+  .replace(/&/g, '&amp;')
+  .replace(/</g, '&lt;')
+  .replace(/>/g, '&gt;')
+  .replace(/"/g, '&quot;')
+  .replace(/'/g, '&#39;')
+const safeUrl = (value: string) => /^https?:\/\//i.test(value) ? value : '#'
+const linkifyMarkdown = (value: string) => value
+  .replace(/\[([^\]]+)]\((https?:\/\/[^\s)]+)\)/gi, (_match, label, url) => `<a href="${safeUrl(url)}" target="_blank" rel="nofollow noopener noreferrer">${label}</a>`)
+const linkifyText = (value: string) => linkifyMarkdown(value)
+  .replace(/(^|[\s(>])((https?:\/\/)[^\s<)]+)/gi, (_match, prefix, url) => `${prefix}<a href="${safeUrl(url)}" target="_blank" rel="nofollow noopener noreferrer">${url}</a>`)
+const hardenLinks = (html: string) => html.replace(/<a\s+([^>]*href=["'][^"']+["'][^>]*)>/gi, (_match, attrs) => {
+  let next = String(attrs).replace(/\s+on\w+=("[^"]*"|'[^']*'|[^\s>]+)/gi, '')
+  if (!/\starget=/i.test(next)) next += ' target="_blank"'
+  if (!/\srel=/i.test(next)) next += ' rel="nofollow noopener noreferrer"'
+  return `<a ${next}>`
+})
+const sanitizeHtml = (html: string) => hardenLinks(html
+  .replace(/<script[^>]*>[\s\S]*?<\/script>/gi, '')
+  .replace(/<style[^>]*>[\s\S]*?<\/style>/gi, '')
+  .replace(/<(iframe|object|embed)[^>]*>[\s\S]*?<\/\1>/gi, '')
+  .replace(/\s+on\w+=("[^"]*"|'[^']*'|[^\s>]+)/gi, '')
+  .replace(/(href|src)=(['"])javascript:[\s\S]*?\2/gi, '$1="#"'))
+const formatBodyHtml = (raw: string) => {
+  const value = raw.trim()
+  if (!value) return ''
+  if (/<[a-z][\s\S]*>/i.test(value)) return sanitizeHtml(linkifyMarkdown(value))
+  return value
+    .split(/\n{2,}/)
+    .map((part) => `<p>${linkifyText(escapeHtml(part).replace(/\n/g, '<br />'))}</p>`)
+    .join('')
+}
 const safeField = (post: SitePost, keys: string[]) => {
   const content = getContent(post)
   for (const key of keys) {
@@ -282,7 +314,7 @@ function MarketplaceDetailView({ task, post, related }: { task: TaskKey; post: S
               <div className="border border-[var(--tk-line)] bg-[var(--tk-surface)] p-7">
                 <p className="editable-tech text-xs font-bold uppercase tracking-[0.18em] text-[var(--tk-accent)]">{safeCategory(post, isProfile ? 'Profile' : 'Classified')}</p>
                 <p className="mt-5 text-lg leading-8 text-[var(--tk-muted)]">{safeSummary(post)}</p>
-                <div className="article-content mt-8 whitespace-pre-line text-[1.02rem] leading-8 text-[var(--tk-text)]">{body}</div>
+                <div className="article-content mt-8 text-[1.02rem] leading-8 text-[var(--tk-text)]" dangerouslySetInnerHTML={{ __html: formatBodyHtml(body) }} />
               </div>
 
               {isProfile ? (
