@@ -33,14 +33,26 @@ const imageOf = (post: SitePost) => {
 const bodyOf = (post: SitePost) => asText(getContent(post).body) || asText(getContent(post).description) || post.summary || 'Details will appear here once available.'
 const escapeHtml = (value: string) => value.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#39;')
 const safeUrl = (value: string) => (/^https?:\/\//i.test(value) ? value : '#')
-const linkifyText = (value: string) =>
-  value.replace(/(^|[\s(>])((https?:\/\/)[^\s<)]+)/gi, (_match, prefix, url) => `${prefix}<a href="${safeUrl(url)}" target="_blank" rel="nofollow noopener noreferrer">${url}</a>`)
-const formatPlainText = (raw: string) =>
-  raw
-    .trim()
-    .split(/\n{2,}/)
-    .map((part) => `<p>${linkifyText(escapeHtml(part).replace(/\n/g, '<br />'))}</p>`)
-    .join('')
+const linkifyMarkdown = (value: string) => value.replace(/\[([^\]]+)]\((https?:\/\/[^\s)]+)\)/gi, (_m, label, url) => `<a href="${safeUrl(url)}" target="_blank" rel="nofollow noopener noreferrer">${label}</a>`)
+const linkifyText = (value: string) => linkifyMarkdown(value).replace(/(^|[\s(>])((https?:\/\/)[^\s<)]+)/gi, (_match, prefix, url) => `${prefix}<a href="${safeUrl(url)}" target="_blank" rel="nofollow noopener noreferrer">${url}</a>`)
+const hardenLinks = (html: string) => html.replace(/<a\s+([^>]*href=["'][^"']+["'][^>]*)>/gi, (_m, attrs) => {
+  let next = String(attrs).replace(/\s+on\w+=("[^"]*"|'[^']*'|[^\s>]+)/gi, '')
+  if (!/\starget=/i.test(next)) next += ' target="_blank"'
+  if (!/\srel=/i.test(next)) next += ' rel="nofollow noopener noreferrer"'
+  return `<a ${next}>`
+})
+const sanitizeHtml = (html: string) => hardenLinks(html
+  .replace(/<script[^>]*>[\s\S]*?<\/script>/gi, '')
+  .replace(/<style[^>]*>[\s\S]*?<\/style>/gi, '')
+  .replace(/<(iframe|object|embed)[^>]*>[\s\S]*?<\/\1>/gi, '')
+  .replace(/\s+on\w+=("[^"]*"|'[^']*'|[^\s>]+)/gi, '')
+  .replace(/(href|src)=(['"])javascript:[\s\S]*?\2/gi, '$1="#"'))
+const formatPlainText = (raw: string) => {
+  const value = raw.trim()
+  if (!value) return ''
+  if (/<[a-z][\s\S]*>/i.test(value)) return sanitizeHtml(linkifyMarkdown(value))
+  return value.split(/\n{2,}/).map((part) => `<p>${linkifyText(escapeHtml(part).replace(/\n/g, '<br />'))}</p>`).join('')
+}
 
 const hashStr = (value: string) => {
   let h = 0
@@ -274,7 +286,7 @@ function EditorialDetailView({
             <article className="min-w-0">
               <p className="editable-tech text-xs font-bold uppercase tracking-[0.18em] text-[var(--tk-accent)]">{categoryOf(post)}</p>
               <h1 className="editable-display mt-4 text-[3.4rem] font-semibold uppercase leading-[0.9] tracking-[-0.06em] sm:text-[4.6rem]">{post.title}</h1>
-              <p className="mt-6 max-w-3xl text-lg leading-8 text-[var(--tk-muted)]">{summaryOf(post)}</p>
+              <div className="article-content mt-6 max-w-3xl text-lg leading-8 text-[var(--tk-muted)]" dangerouslySetInnerHTML={{ __html: formatPlainText(post.summary || asText(getContent(post).description) || asText(getContent(post).excerpt) || '') }} />
 
               <div className="article-content mt-10 border-t border-[var(--tk-line)] pt-8 text-[1.04rem] leading-8" dangerouslySetInnerHTML={{ __html: formatPlainText(bodyOf(post)) }} />
 
