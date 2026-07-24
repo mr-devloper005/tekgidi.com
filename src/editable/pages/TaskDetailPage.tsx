@@ -102,12 +102,12 @@ const stripHtml = (value: string) => value.replace(/<[^>]*>/g, ' ').replace(/\s+
 // (some posts store the full HTML body in `summary`, which would render twice).
 const comparableText = (value: string) => stripHtml(value).toLowerCase().replace(/[^\p{L}\p{N}]+/gu, ' ').trim()
 
-const leadText = (post: SitePost) => {
+const leadHtml = (post: SitePost) => {
   const summary = summaryText(post)
   if (!summary) return ''
-  const lead = stripHtml(summary)
-  const leadKey = comparableText(lead)
-  return leadKey && comparableText(getBody(post)).includes(leadKey) ? '' : lead
+  const leadKey = comparableText(summary)
+  if (leadKey && comparableText(getBody(post)).includes(leadKey)) return ''
+  return formatPlainText(summary)
 }
 const categoryOf = (post: SitePost, fallback: string) => asText(getContent(post).category) || post.tags?.[0] || fallback
 const mapSrcFor = (post: SitePost) => {
@@ -240,7 +240,7 @@ function ListingDetail({ post, related }: { post: SitePost; related: SitePost[] 
               <DetailMeta post={post} category={getField(post, ['category'])} />
             </div>
           </div>
-          {leadText(post) ? <p className="mt-7 max-w-2xl text-lg leading-8 text-[var(--tk-muted)]">{leadText(post)}</p> : null}
+          {leadHtml(post) ? <div className="article-content mt-7 max-w-2xl text-lg leading-8 text-[var(--tk-muted)]" dangerouslySetInnerHTML={{ __html: leadHtml(post) }} /> : null}
           <InfoGrid items={[['Location', address, MapPin], ['Phone', phone, Phone], ['Email', email, Mail], ['Website', website, Globe2]]} />
           <Divider />
           <BodyContent post={post} />
@@ -315,7 +315,7 @@ function ImageDetail({ post, related }: { post: SitePost; related: SitePost[] })
           <aside className="lg:sticky lg:top-24 lg:self-start">
             <div className="inline-flex items-center gap-2 rounded-full border border-[var(--tk-line)] px-3.5 py-1.5 text-xs font-medium text-[var(--tk-muted)]"><Camera className="h-3.5 w-3.5 text-[var(--tk-accent)]" /> Image story</div>
             <h1 className="editable-display mt-6 text-4xl font-semibold leading-[1.05] tracking-[-0.03em] sm:text-5xl">{post.title}</h1>
-            {leadText(post) ? <p className="mt-6 text-lg leading-8 text-[var(--tk-muted)]">{leadText(post)}</p> : null}
+            {leadHtml(post) ? <div className="article-content mt-6 text-lg leading-8 text-[var(--tk-muted)]" dangerouslySetInnerHTML={{ __html: leadHtml(post) }} /> : null}
             <BodyContent post={post} compact />
           </aside>
         </div>
@@ -335,7 +335,7 @@ function BookmarkDetail({ post, related }: { post: SitePost; related: SitePost[]
         <div className="mt-10 flex h-16 w-16 items-center justify-center rounded-2xl bg-[var(--tk-accent-soft)] text-[var(--tk-accent)]"><Bookmark className="h-7 w-7" /></div>
         <div className="mt-6"><Kicker task="sbm">Saved resource</Kicker></div>
         <h1 className="editable-display mt-4 text-4xl font-semibold leading-[1.05] tracking-[-0.03em] sm:text-5xl">{post.title}</h1>
-        {leadText(post) ? <p className="mt-6 text-lg leading-8 text-[var(--tk-muted)]">{leadText(post)}</p> : null}
+        {leadHtml(post) ? <div className="article-content mt-6 text-lg leading-8 text-[var(--tk-muted)]" dangerouslySetInnerHTML={{ __html: leadHtml(post) }} /> : null}
         {website ? (
           <Link href={website} target="_blank" rel="noreferrer" className="mt-8 inline-flex items-center gap-2 rounded-full bg-[var(--tk-accent)] px-5 py-3 text-sm font-semibold text-[var(--tk-on-accent)] transition hover:opacity-90">
             Open resource <ExternalLink className="h-4 w-4" />

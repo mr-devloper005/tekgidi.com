@@ -277,6 +277,7 @@ function MarketplaceDetailView({ task, post, related }: { task: TaskKey; post: S
   const email = safeField(post, ['email'])
   const website = safeField(post, ['website', 'url'])
   const summary = safeSummary(post)
+  const rawSummary = post.summary || asText(getContent(post).description) || asText(getContent(post).body) || ''
   const rawBody = asText(getContent(post).body) || asText(getContent(post).description) || post.summary || ''
   const bodyIsDuplicate = rawBody && stripHtml(rawBody) === summary
   const body = !rawBody || bodyIsDuplicate ? '' : rawBody
@@ -316,7 +317,7 @@ function MarketplaceDetailView({ task, post, related }: { task: TaskKey; post: S
             <article className="min-w-0">
               <div className="border border-[var(--tk-line)] bg-[var(--tk-surface)] p-7">
                 <p className="editable-tech text-xs font-bold uppercase tracking-[0.18em] text-[var(--tk-accent)]">{safeCategory(post, isProfile ? 'Profile' : 'Classified')}</p>
-                <p className="mt-5 text-lg leading-8 text-[var(--tk-muted)]">{summary}</p>
+                <div className="article-content mt-5 text-lg leading-8 text-[var(--tk-muted)]" dangerouslySetInnerHTML={{ __html: formatBodyHtml(rawSummary || summary) }} />
                 {body ? <div className="article-content mt-8 text-[1.02rem] leading-8 text-[var(--tk-text)]" dangerouslySetInnerHTML={{ __html: formatBodyHtml(body) }} /> : null}
               </div>
 
